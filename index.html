@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I miei siti</title>
+<script>
+  // Applica il tema prima del rendering per evitare il lampo di colore sbagliato
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("home-siti:theme"); } catch (e) {}
+    if (t !== "light" && t !== "dark") {
+      t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #3b3b3d;
+    --circle: #2b2b2d;
+    --text: #e8e8ea;
+    --muted: #a4a4aa;
+    --field: #2b2b2d;
+    --hover: rgba(255, 255, 255, 0.07);
+    --border: rgba(255, 255, 255, 0.12);
+    --accent: #8ab4f8;
+    --danger: #f28b82;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f4f6;
+    --circle: #e4e4e8;
+    --text: #1f1f23;
+    --muted: #66666e;
+    --field: #ffffff;
+    --hover: rgba(0, 0, 0, 0.05);
+    --border: rgba(0, 0, 0, 0.12);
+    --accent: #1a73e8;
+    --danger: #c5221f;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding:
+      calc(24px + env(safe-area-inset-top))
+      calc(16px + env(safe-area-inset-right))
+      calc(40px + env(safe-area-inset-bottom))
+      calc(16px + env(safe-area-inset-left));
+  }
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Tema */
+  .theme {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 999px;
+    background: var(--field);
+    border: 1px solid var(--border);
+  }
+  .theme button {
+    border: 0;
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .theme button[aria-pressed="true"] { background: var(--circle); color: var(--text); font-weight: 600; }
+
+  /* Ricerca */
+  .search {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 40px 0 28px;
+  }
+  .search svg {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    fill: var(--muted);
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    height: 48px;
+    padding: 0 20px 0 50px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+  }
+  .search input::placeholder { color: var(--muted); }
+  .search input:focus-visible { outline-offset: 0; }
+
+  /* Sezioni e griglia */
+  section { width: 100%; margin-top: 18px; }
+  section[hidden] { display: none; }
+  h2 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cell { position: relative; }
+  .tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 112px;
+    padding: 14px 6px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    text-decoration: none;
+    font: inherit;
+    cursor: pointer;
+  }
+  .tile:hover { background: var(--hover); }
+  .circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--circle);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    line-height: 1;
+  }
+  .name {
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.3;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .remove {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--circle);
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 22px;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
+  }
+  .cell:hover .remove, .remove:focus-visible { opacity: 1; }
+  .remove:hover { color: var(--danger); }
+  @media (hover: none) { .remove { opacity: 1; } }
+
+  .empty { margin: 24px 0 0; color: var(--muted); }
+
+  /* Dialog */
+  dialog {
+    width: min(400px, calc(100vw - 32px));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+    text-align: left;
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+  dialog h3 { margin: 0 0 14px; font-size: 16px; }
+  dialog label { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+  dialog input {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+  }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  .actions button {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+  .actions button[type="submit"] { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+
+  @media (max-width: 480px) {
+    .search { margin: 28px 0 20px; }
+    .tile { width: 96px; padding: 12px 4px 8px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="theme" role="group" aria-label="Tema">
+    <button type="button" data-theme-value="light" aria-pressed="false">Chiaro</button>
+    <button type="button" data-theme-value="dark" aria-pressed="false">Scuro</button>
+  </div>
+
+  <form class="search" role="search" id="search-form">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <input id="q" type="search" placeholder="Cerca tra i tuoi siti" aria-label="Cerca tra i tuoi siti" autocomplete="off">
+  </form>
+
+  <div id="sections"></div>
+  <p class="empty" id="empty" hidden>Nessun sito corrisponde alla ricerca.</p>
+</main>
+
+<dialog id="add-dialog" aria-labelledby="add-title">
+  <form method="dialog" id="add-form">
+    <h3 id="add-title">Aggiungi collegamento</h3>
+    <label>Nome
+      <input name="name" required maxlength="60">
+    </label>
+    <label>Indirizzo
+      <input name="url" required inputmode="url" placeholder="https://">
+    </label>
+    <label>Emoji (facoltativo)
+      <input name="icon" maxlength="8" placeholder="🔗">
+    </label>
+    <div class="actions">
+      <button type="button" id="add-cancel">Annulla</button>
+      <button type="submit">Aggiungi</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // ——— Dati: aggiungi qui i nuovi siti, una riga per sito ———
+  const SECTIONS = [
+    { title: "Siti su Vercel", items: [
+      { name: "nicanphoto", icon: "📷", url: "https://nicanphoto.vercel.app" },
+      { name: "foto-feedback", icon: "💬", url: "https://foto-feedback-psi.vercel.app" },
+      { name: "nicanphoto-vercel-app", icon: "🖼️", url: "https://nicanphoto-vercel-app.vercel.app" },
+      { name: "liste-points", icon: "📋", url: "https://liste-points.vercel.app" },
+    ]},
+    { title: "Artifact di Claude", items: [
+      { name: "Cugnasco-Gerra: Ricostruzione 3D", icon: "🏔️", url: "https://claude.ai/artifact/LYtYPWr9exY3DNLof5GK53" },
+      { name: "Portfolio dinamico: anteprima", icon: "✨", url: "https://claude.ai/artifact/ERKcWYjnNoESKuYs4Ebo4L" },
+      { name: "Nicanphoto: Anteprima direzione", icon: "🧭", url: "https://claude.ai/artifact/C3Qk6HhS6Jocco6EgTK11J" },
+      { name: "Portfolio Fotografo", icon: "🎞️", url: "https://claude.ai/artifact/WNfUwJjNsox4wCdatjbN3e" },
+      { name: "Registre des normes", icon: "📐", url: "https://claude.ai/artifact/Nktw3JrmyCkTaTdi5psVKR" },
+      { name: "Note de chantier: Correspondance des positions", icon: "🏗️", url: "https://claude.ai/artifact/CHCtZNShAskXZSpn23iV4Y" },
+      { name: "Biglietto aereo Islanda", icon: "✈️", url: "https://claude.ai/artifact/W6LE7n1SyzqvJEdWnYS5w7" },
+    ]},
+  ];
+
+  const STORE_THEME = "home-siti:theme";
+  const STORE_LINKS = "home-siti:links";
+
+  function load(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+
+  // ——— Tema ———
+  const themeButtons = document.querySelectorAll("[data-theme-value]");
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    themeButtons.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.themeValue === t)));
+  }
+  applyTheme(document.documentElement.getAttribute("data-theme"));
+  themeButtons.forEach(b => b.addEventListener("click", () => {
+    applyTheme(b.dataset.themeValue);
+    try { localStorage.setItem(STORE_THEME, b.dataset.themeValue); } catch (e) {}
+  }));
+
+  // ——— Collegamenti ———
+  let custom = load(STORE_LINKS, []);
+  if (!Array.isArray(custom)) custom = [];
+
+  const sectionsEl = document.getElementById("sections");
+  const emptyEl = document.getElementById("empty");
+  const q = document.getElementById("q");
+  const dialog = document.getElementById("add-dialog");
+  const addForm = document.getElementById("add-form");
+
+  function normalizeUrl(u) {
+    u = u.trim();
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
+    try {
+      const parsed = new URL(u);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : null;
+    } catch (e) { return null; }
+  }
+
+  function tile(item) {
+    const a = document.createElement("a");
+    a.className = "tile";
+    a.href = item.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.title = item.name;
+    const c = document.createElement("span");
+    c.className = "circle";
+    c.setAttribute("aria-hidden", "true");
+    c.textContent = item.icon || "🔗";
+    const n = document.createElement("span");
+    n.className = "name";
+    n.textContent = item.name;
+    a.append(c, n);
+    return a;
+  }
+
+  function matches(item, term) {
+    return !term || (item.name + " " + item.url).toLowerCase().includes(term);
+  }
+
+  function render() {
+    const term = q.value.trim().toLowerCase();
+    const all = SECTIONS.concat([{ title: "I tuoi collegamenti", items: custom, custom: true }]);
+    let visible = 0;
+    sectionsEl.textContent = "";
+
+    all.forEach(sec => {
+      const items = sec.items.map((it, i) => ({ it, i })).filter(x => matches(x.it, term));
+      const showAdd = sec.custom && !term;
+      const s = document.createElement("section");
+      s.hidden = !items.length && !showAdd;
+      const h = document.createElement("h2");
+      h.textContent = sec.title;
+      const ul = document.createElement("ul");
+      ul.className = "grid";
+
+      items.forEach(({ it, i }) => {
+        visible++;
+        const li = document.createElement("li");
+        li.className = "cell";
+        li.append(tile(it));
+        if (sec.custom) {
+          const x = document.createElement("button");
+          x.type = "button";
+          x.className = "remove";
+          x.textContent = "×";
+          x.setAttribute("aria-label", "Rimuovi " + it.name);
+          x.addEventListener("click", () => {
+            custom.splice(i, 1);
+            save(STORE_LINKS, custom);
+            render();
+          });
+          li.append(x);
+        }
+        ul.append(li);
+      });
+
+      if (showAdd) {
+        const li = document.createElement("li");
+        li.className = "cell";
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "tile";
+        b.innerHTML = '<span class="circle" aria-hidden="true">+</span><span class="name">Aggiungi</span>';
+        b.addEventListener("click", () => { addForm.reset(); dialog.showModal(); });
+        li.append(b);
+        ul.append(li);
+      }
+
+      s.append(h, ul);
+      sectionsEl.append(s);
+    });
+
+    emptyEl.hidden = !(term && visible === 0);
+  }
+
+  q.addEventListener("input", render);
+  document.getElementById("search-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const first = sectionsEl.querySelector("a.tile");
+    if (q.value.trim() && first) window.open(first.href, "_blank", "noopener,noreferrer");
+  });
+
+  document.getElementById("add-cancel").addEventListener("click", () => dialog.close());
+  addForm.addEventListener("submit", e => {
+    const data = new FormData(addForm);
+    const url = normalizeUrl(String(data.get("url")));
+    const urlInput = addForm.elements.url;
+    if (!url) {
+      e.preventDefault();
+      urlInput.setCustomValidity("Indirizzo non valido");
+      urlInput.reportValidity();
+      return;
+    }
+    custom.push({
+      name: String(data.get("name")).trim(),
+      icon: String(data.get("icon")).trim() || "🔗",
+      url,
+    });
+    save(STORE_LINKS, custom);
+    render();
+  });
+  addForm.elements.url.addEventListener("input", e => e.target.setCustomValidity(""));
+
+  render();
+</script>
+</body>
+</html>
