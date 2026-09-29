@@ -1,0 +1,20 @@
+{
+  "sections": [
+    { "title": "Siti su Vercel", "items": [
+      { "name": "Nicanphoto", "icon": "📷", "url": "https://nicanphoto.vercel.app", "type": "site" },
+      { "name": "Foto feedback", "icon": "💬", "url": "https://foto-feedback-psi.vercel.app", "type": "site" },
+      { "name": "Nicanphoto (app)", "icon": "🖼️", "url": "https://nicanphoto-vercel-app.vercel.app", "type": "site" },
+      { "name": "Liste points", "icon": "📋", "url": "https://liste-points.vercel.app", "type": "site" }
+    ]},
+    { "title": "Artifact di Claude", "items": [
+      { "name": "Cugnasco-Gerra 3D", "icon": "🏗️", "url": "https://claude.ai/artifact/LYtYPWr9exY3DNLof5GK53", "type": "artifact" },
+      { "name": "Portfolio dinamico", "icon": "🎞️", "url": "https://claude.ai/artifact/ERKcWYjnNoESKuYs4Ebo4L", "type": "artifact" },
+      { "name": "Nicanphoto — direzione", "icon": "🧭", "url": "https://claude.ai/artifact/C3Qk6HhS6Jocco6EgTK11J", "type": "artifact" },
+      { "name": "Portfolio Fotografo", "icon": "📸", "url": "https://claude.ai/artifact/WNfUwJjNsox4wCdatjbN3e", "type": "artifact" },
+      { "name": "Registre des normes", "icon": "📑", "url": "https://claude.ai/artifact/Nktw3JrmyCkTaTdi5psVKR", "type": "artifact" },
+      { "name": "Note de chantier", "icon": "🗒️", "url": "https://claude.ai/artifact/CHCtZNShAskXZSpn23iV4Y", "type": "artifact" },
+      { "name": "Biglietto aereo Islanda", "icon": "✈️", "url": "https://claude.ai/artifact/W6LE7n1SyzqvJEdWnYS5w7", "type": "artifact" }
+    ]},
+    { "title": "Programmi (.exe)", "items": [] }
+  ]
+}

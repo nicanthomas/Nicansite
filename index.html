@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
 <title>I miei siti</title>
 <script>
   // Applica il tema prima del rendering per evitare il lampo di colore sbagliato
@@ -43,6 +44,7 @@
 
   * { box-sizing: border-box; }
   html, body { margin: 0; }
+  [hidden] { display: none !important; }
   body {
     min-height: 100vh;
     background: var(--bg);
@@ -54,7 +56,7 @@
       calc(40px + env(safe-area-inset-bottom))
       calc(16px + env(safe-area-inset-left));
   }
-  main {
+  main, #app {
     max-width: 920px;
     margin: 0 auto;
     display: flex;
@@ -62,7 +64,30 @@
     align-items: center;
     text-align: center;
   }
+  #app, #sections { width: 100%; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Barra in alto: tema, Modifica, Esci */
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  .pill {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: var(--field);
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .pill[aria-pressed="true"] { background: var(--circle); color: var(--text); font-weight: 600; border-color: var(--accent); }
+  .pill.quiet { background: transparent; border-color: transparent; }
+  .pill.quiet:hover { color: var(--text); }
 
   /* Tema */
   .theme {
@@ -102,7 +127,7 @@
     fill: var(--muted);
     pointer-events: none;
   }
-  .search input {
+  .search input, .login input {
     width: 100%;
     height: 48px;
     padding: 0 20px 0 50px;
@@ -113,14 +138,46 @@
     font: inherit;
     font-size: 16px;
   }
-  .search input::placeholder { color: var(--muted); }
-  .search input:focus-visible { outline-offset: 0; }
+  .search input::placeholder, .login input::placeholder { color: var(--muted); }
+  .search input:focus-visible, .login input:focus-visible { outline-offset: 0; }
+
+  /* Login */
+  .login {
+    width: 100%;
+    max-width: 360px;
+    margin-top: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .login h1 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+  .login input { padding: 0 20px; text-align: center; }
+  .primary {
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 10px 28px;
+    background: var(--accent);
+    color: var(--bg);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .primary:disabled { opacity: 0.6; cursor: default; }
+  .error { margin: 0; color: var(--danger); font-size: 13px; }
+  .note { margin: 40px 0 0; color: var(--muted); }
 
   /* Sezioni e griglia */
   section { width: 100%; margin-top: 18px; }
-  section[hidden] { display: none; }
-  h2 {
+  .sec-head {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
     margin: 0 0 8px;
+  }
+  h2 {
+    margin: 0;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -133,7 +190,9 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    border-radius: 12px;
   }
+  .grid.drop-end { outline: 2px dashed var(--accent); outline-offset: 2px; }
   .cell { position: relative; }
   .tile {
     display: flex;
@@ -148,9 +207,11 @@
     text-decoration: none;
     font: inherit;
     cursor: pointer;
+    transition: background-color 0.15s;
   }
   .tile:hover { background: var(--hover); }
   .circle {
+    position: relative;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -159,6 +220,18 @@
     place-items: center;
     font-size: 26px;
     line-height: 1;
+  }
+  .badge {
+    position: absolute;
+    right: -8px;
+    bottom: -2px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1.4;
   }
   .name {
     margin-top: 8px;
@@ -171,27 +244,63 @@
     overflow: hidden;
     overflow-wrap: anywhere;
   }
-  .remove {
-    position: absolute;
-    top: 4px;
-    right: 8px;
+
+  /* Controlli della modalità modifica */
+  .ctl {
     width: 22px;
     height: 22px;
     border: 0;
     border-radius: 50%;
     background: var(--circle);
     color: var(--muted);
-    font-size: 15px;
+    font: inherit;
+    font-size: 12px;
     line-height: 22px;
     padding: 0;
     cursor: pointer;
-    opacity: 0;
   }
-  .cell:hover .remove, .remove:focus-visible { opacity: 1; }
-  .remove:hover { color: var(--danger); }
-  @media (hover: none) { .remove { opacity: 1; } }
+  .ctl:hover { color: var(--text); }
+  .ctl.del { font-size: 15px; }
+  .ctl.del:hover { color: var(--danger); }
+  .cell > .del { position: absolute; top: 4px; right: 8px; }
+  .cell > .edit { position: absolute; top: 4px; left: 8px; }
+  .move { display: flex; justify-content: center; gap: 6px; padding-bottom: 6px; }
+  .editing .cell[draggable="true"] { cursor: grab; }
+  .cell.dragging { opacity: 0.4; }
+  .cell.drop-before::before, .cell.drop-after::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+  .cell.drop-before::before { left: -1px; }
+  .cell.drop-after::after { right: -1px; }
+  .new-section { margin-top: 24px; }
 
   .empty { margin: 24px 0 0; color: var(--muted); }
+
+  /* Stato del salvataggio */
+  #status {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--field);
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  #status.show { opacity: 1; }
+  #status.fail { color: var(--danger); pointer-events: auto; cursor: pointer; }
 
   /* Dialog */
   dialog {
@@ -206,7 +315,7 @@
   dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
   dialog h3 { margin: 0 0 14px; font-size: 16px; }
   dialog label { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
-  dialog input {
+  dialog input, dialog select {
     display: block;
     width: 100%;
     margin-top: 4px;
@@ -234,73 +343,100 @@
   @media (max-width: 480px) {
     .search { margin: 28px 0 20px; }
     .tile { width: 96px; padding: 12px 4px 8px; }
+    .login { margin-top: 48px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
 </head>
 <body>
 <main>
-  <div class="theme" role="group" aria-label="Tema">
-    <button type="button" data-theme-value="light" aria-pressed="false">Chiaro</button>
-    <button type="button" data-theme-value="dark" aria-pressed="false">Scuro</button>
+  <div class="topbar">
+    <div class="theme" role="group" aria-label="Tema">
+      <button type="button" data-theme-value="light" aria-pressed="false">Chiaro</button>
+      <button type="button" data-theme-value="dark" aria-pressed="false">Scuro</button>
+    </div>
+    <button type="button" class="pill" id="edit-toggle" aria-pressed="false" hidden>Modifica</button>
+    <button type="button" class="pill quiet" id="logout" hidden>Esci</button>
   </div>
 
-  <form class="search" role="search" id="search-form">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-    <input id="q" type="search" placeholder="Cerca tra i tuoi siti" aria-label="Cerca tra i tuoi siti" autocomplete="off">
+  <p class="note" id="loading">Caricamento…</p>
+
+  <div class="note" id="load-error" hidden>
+    <p id="load-error-text">Impossibile caricare i collegamenti.</p>
+    <button type="button" class="primary" id="load-retry">Riprova</button>
+  </div>
+
+  <form class="login" id="login" hidden>
+    <h1>I miei siti</h1>
+    <input id="password" type="password" name="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+    <button type="submit" class="primary" id="login-btn">Entra</button>
+    <p class="error" id="login-error" role="alert" hidden></p>
   </form>
 
-  <div id="sections"></div>
-  <p class="empty" id="empty" hidden>Nessun sito corrisponde alla ricerca.</p>
+  <div id="app" hidden>
+    <form class="search" role="search" id="search-form">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input id="q" type="search" placeholder="Cerca tra i tuoi siti" aria-label="Cerca tra i tuoi siti" autocomplete="off">
+    </form>
+
+    <div id="sections"></div>
+    <p class="empty" id="empty" hidden>Nessun sito corrisponde alla ricerca.</p>
+    <button type="button" class="pill new-section" id="new-section" hidden>+ Nuova sezione</button>
+  </div>
 </main>
 
-<dialog id="add-dialog" aria-labelledby="add-title">
-  <form method="dialog" id="add-form">
-    <h3 id="add-title">Aggiungi collegamento</h3>
+<button type="button" id="status" aria-live="polite"></button>
+
+<dialog id="item-dialog" aria-labelledby="item-title">
+  <form method="dialog" id="item-form">
+    <h3 id="item-title">Aggiungi collegamento</h3>
     <label>Nome
-      <input name="name" required maxlength="60">
+      <input name="name" required maxlength="80">
     </label>
     <label>Indirizzo
       <input name="url" required inputmode="url" placeholder="https://">
     </label>
     <label>Emoji (facoltativo)
-      <input name="icon" maxlength="8" placeholder="🔗">
+      <input name="icon" maxlength="16" placeholder="🔗">
+    </label>
+    <label>Tipo
+      <select name="type">
+        <option value="site">Sito</option>
+        <option value="artifact">Artifact</option>
+        <option value="exe">Programma .exe</option>
+      </select>
+    </label>
+    <label>Sezione
+      <select name="section"></select>
+    </label>
+    <label id="new-section-field" hidden>Nome della nuova sezione
+      <input name="newSection" maxlength="60">
     </label>
     <div class="actions">
-      <button type="button" id="add-cancel">Annulla</button>
-      <button type="submit">Aggiungi</button>
+      <button type="button" data-close>Annulla</button>
+      <button type="submit" id="item-submit">Aggiungi</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="section-dialog" aria-labelledby="section-title">
+  <form method="dialog" id="section-form">
+    <h3 id="section-title">Rinomina sezione</h3>
+    <label>Nome
+      <input name="title" required maxlength="60">
+    </label>
+    <div class="actions">
+      <button type="button" data-close>Annulla</button>
+      <button type="submit">Salva</button>
     </div>
   </form>
 </dialog>
 
 <script>
-  // ——— Dati: aggiungi qui i nuovi siti, una riga per sito ———
-  const SECTIONS = [
-    { title: "Siti su Vercel", items: [
-      { name: "nicanphoto", icon: "📷", url: "https://nicanphoto.vercel.app" },
-      { name: "foto-feedback", icon: "💬", url: "https://foto-feedback-psi.vercel.app" },
-      { name: "nicanphoto-vercel-app", icon: "🖼️", url: "https://nicanphoto-vercel-app.vercel.app" },
-      { name: "liste-points", icon: "📋", url: "https://liste-points.vercel.app" },
-    ]},
-    { title: "Artifact di Claude", items: [
-      { name: "Cugnasco-Gerra: Ricostruzione 3D", icon: "🏔️", url: "https://claude.ai/artifact/LYtYPWr9exY3DNLof5GK53" },
-      { name: "Portfolio dinamico: anteprima", icon: "✨", url: "https://claude.ai/artifact/ERKcWYjnNoESKuYs4Ebo4L" },
-      { name: "Nicanphoto: Anteprima direzione", icon: "🧭", url: "https://claude.ai/artifact/C3Qk6HhS6Jocco6EgTK11J" },
-      { name: "Portfolio Fotografo", icon: "🎞️", url: "https://claude.ai/artifact/WNfUwJjNsox4wCdatjbN3e" },
-      { name: "Registre des normes", icon: "📐", url: "https://claude.ai/artifact/Nktw3JrmyCkTaTdi5psVKR" },
-      { name: "Note de chantier: Correspondance des positions", icon: "🏗️", url: "https://claude.ai/artifact/CHCtZNShAskXZSpn23iV4Y" },
-      { name: "Biglietto aereo Islanda", icon: "✈️", url: "https://claude.ai/artifact/W6LE7n1SyzqvJEdWnYS5w7" },
-    ]},
-  ];
-
   const STORE_THEME = "home-siti:theme";
-  const STORE_LINKS = "home-siti:links";
-
-  function load(key, fallback) {
-    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; }
-  }
-  function save(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
-  }
+  const $ = id => document.getElementById(id);
 
   // ——— Tema ———
   const themeButtons = document.querySelectorAll("[data-theme-value]");
@@ -314,41 +450,225 @@
     try { localStorage.setItem(STORE_THEME, b.dataset.themeValue); } catch (e) {}
   }));
 
-  // ——— Collegamenti ———
-  let custom = load(STORE_LINKS, []);
-  if (!Array.isArray(custom)) custom = [];
+  // ——— Stato ———
+  let data = null;        // { sections: [...] } come arriva da /api/links
+  let editing = false;
+  let dirty = false;      // ci sono modifiche non ancora salvate
+  let saving = false;
+  let queued = false;
+  let retryTimer = null;
+  let statusTimer = null;
 
-  const sectionsEl = document.getElementById("sections");
-  const emptyEl = document.getElementById("empty");
-  const q = document.getElementById("q");
-  const dialog = document.getElementById("add-dialog");
-  const addForm = document.getElementById("add-form");
+  const sectionsEl = $("sections");
+  const q = $("q");
 
-  function normalizeUrl(u) {
-    u = u.trim();
-    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
-    try {
-      const parsed = new URL(u);
-      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : null;
-    } catch (e) { return null; }
+  function show(view) {
+    $("loading").hidden = view !== "loading";
+    $("load-error").hidden = view !== "error";
+    $("login").hidden = view !== "login";
+    $("app").hidden = view !== "app";
+    $("edit-toggle").hidden = view !== "app";
+    $("logout").hidden = view !== "app";
+    if (view === "login") setTimeout(() => $("password").focus(), 0);
   }
 
+  function setStatus(text, kind) {
+    const el = $("status");
+    clearTimeout(statusTimer);
+    el.textContent = text;
+    el.className = "show" + (kind === "fail" ? " fail" : "");
+    if (kind === "ok") statusTimer = setTimeout(() => { el.className = ""; }, 1800);
+  }
+
+  function newId() {
+    const b = new Uint8Array(6);
+    crypto.getRandomValues(b);
+    return btoa(String.fromCharCode(...b)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  // ——— Rete ———
+  async function load() {
+    show("loading");
+    try {
+      const r = await fetch("/api/links", { credentials: "same-origin", cache: "no-store" });
+      if (r.status === 401) return show("login");
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "HTTP " + r.status);
+      data = await r.json();
+      show("app");
+      render();
+    } catch (e) {
+      $("load-error-text").textContent = "Impossibile caricare i collegamenti (" + e.message + ").";
+      show("error");
+    }
+  }
+
+  // Invia sempre l'intero elenco. Se un salvataggio è già in corso, quello
+  // successivo parte appena finisce; se fallisce, la modifica resta in pagina
+  // e si riprova da soli dopo 5 secondi (o subito, cliccando sullo stato).
+  async function persist() {
+    dirty = true;
+    clearTimeout(retryTimer);
+    if (saving) { queued = true; return; }
+    saving = true;
+    setStatus("Salvataggio…");
+    try {
+      const r = await fetch("/api/links", {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (r.status === 401) {
+        saving = false; queued = false;
+        setStatus("Sessione scaduta: accedi di nuovo per salvare", "fail");
+        $("login-error").textContent = "Sessione scaduta. Accedi di nuovo: le modifiche verranno salvate.";
+        $("login-error").hidden = false;
+        return show("login");
+      }
+      if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { status: r.status });
+      saving = false;
+      if (queued) { queued = false; return persist(); }
+      dirty = false;
+      setStatus("Salvato", "ok");
+    } catch (e) {
+      saving = false; queued = false;
+      setStatus("Errore, riprova", "fail");
+      // I dati rifiutati dal server (4xx) non migliorano riprovando da soli.
+      if (!(e.status >= 400 && e.status < 500)) retryTimer = setTimeout(persist, 5000);
+    }
+  }
+  $("status").addEventListener("click", () => { if (dirty && !saving) persist(); });
+  window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+  $("load-retry").addEventListener("click", load);
+
+  // ——— Login / Esci ———
+  $("login").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = $("login-btn"), err = $("login-error");
+    btn.disabled = true;
+    err.hidden = true;
+    try {
+      const r = await fetch("/api/login", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: $("password").value }),
+      });
+      if (r.ok) {
+        $("password").value = "";
+        if (dirty && data) { show("app"); render(); persist(); }
+        else load();
+      } else {
+        err.textContent = r.status === 401 ? "Password sbagliata. Riprova." : "Errore del server, riprova tra poco.";
+        err.hidden = false;
+        $("password").select();
+      }
+    } catch (e2) {
+      err.textContent = "Connessione non riuscita, riprova.";
+      err.hidden = false;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("logout").addEventListener("click", async () => {
+    if (dirty && !confirm("Ci sono modifiche non ancora salvate. Uscire comunque?")) return;
+    try { await fetch("/api/logout", { method: "POST", credentials: "same-origin" }); } catch (e) {}
+    data = null; dirty = false; queued = false;
+    clearTimeout(retryTimer);
+    setEditing(false);
+    $("status").className = "";
+    q.value = "";
+    sectionsEl.textContent = "";
+    $("login-error").hidden = true;
+    show("login");
+  });
+
+  // ——— Modalità modifica ———
+  function setEditing(on) {
+    editing = on;
+    $("edit-toggle").setAttribute("aria-pressed", String(on));
+    $("new-section").hidden = !on;
+    sectionsEl.classList.toggle("editing", on);
+    if (data) render();
+  }
+  $("edit-toggle").addEventListener("click", () => setEditing(!editing));
+
+  // ——— Operazioni sui dati ———
+  function findItem(id) {
+    for (const s of data.sections) {
+      const i = s.items.findIndex(it => it.id === id);
+      if (i > -1) return { s, i, item: s.items[i] };
+    }
+    return null;
+  }
+  function findSection(id) { return data.sections.find(s => s.id === id); }
+
+  function moveTo(id, sectionId, index) {
+    const from = findItem(id), to = findSection(sectionId);
+    if (!from || !to) return;
+    const [item] = from.s.items.splice(from.i, 1);
+    if (from.s === to && from.i < index) index--;
+    to.items.splice(Math.max(0, Math.min(index, to.items.length)), 0, item);
+  }
+
+  // Sposta di un posto; oltre il bordo passa alla sezione precedente o successiva.
+  function moveBy(id, dir) {
+    const f = findItem(id);
+    const j = f.i + dir;
+    if (j >= 0 && j < f.s.items.length) {
+      moveTo(id, f.s.id, dir > 0 ? j + 1 : j);
+    } else {
+      const target = data.sections[data.sections.indexOf(f.s) + dir];
+      if (!target) return;
+      moveTo(id, target.id, dir > 0 ? 0 : target.items.length);
+    }
+    commit();
+    const btn = sectionsEl.querySelector(`[data-id="${CSS.escape(id)}"] .${dir < 0 ? "up" : "down"}`);
+    if (btn) btn.focus();
+  }
+
+  function commit() { render(); persist(); }
+
+  // ——— Rendering ———
   function tile(item) {
     const a = document.createElement("a");
     a.className = "tile";
     a.href = item.url;
-    a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.title = item.name;
+    a.draggable = false;
+    if (item.type === "exe") a.setAttribute("download", "");
+    else a.target = "_blank";
     const c = document.createElement("span");
     c.className = "circle";
-    c.setAttribute("aria-hidden", "true");
-    c.textContent = item.icon || "🔗";
+    const icon = document.createElement("span");
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = item.icon || "🔗";
+    c.append(icon);
+    if (item.type === "exe") {
+      const b = document.createElement("span");
+      b.className = "badge";
+      b.textContent = ".exe";
+      c.append(b);
+    }
     const n = document.createElement("span");
     n.className = "name";
     n.textContent = item.name;
     a.append(c, n);
+    if (editing) a.addEventListener("click", e => { e.preventDefault(); openItemDialog(item.id); });
     return a;
+  }
+
+  function ctl(cls, text, label, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "ctl " + cls;
+    b.textContent = text;
+    b.setAttribute("aria-label", label);
+    b.title = label;
+    b.addEventListener("click", onClick);
+    return b;
   }
 
   function matches(item, term) {
@@ -357,37 +677,59 @@
 
   function render() {
     const term = q.value.trim().toLowerCase();
-    const all = SECTIONS.concat([{ title: "I tuoi collegamenti", items: custom, custom: true }]);
     let visible = 0;
     sectionsEl.textContent = "";
 
-    all.forEach(sec => {
-      const items = sec.items.map((it, i) => ({ it, i })).filter(x => matches(x.it, term));
-      const showAdd = sec.custom && !term;
+    data.sections.forEach(sec => {
+      const items = sec.items.filter(it => matches(it, term));
+      const showAdd = editing && !term;
+      if (!items.length && !showAdd) return;
+
       const s = document.createElement("section");
-      s.hidden = !items.length && !showAdd;
+      const head = document.createElement("div");
+      head.className = "sec-head";
       const h = document.createElement("h2");
       h.textContent = sec.title;
+      head.append(h);
+      if (editing) {
+        head.append(ctl("edit", "✎", "Rinomina la sezione " + sec.title, () => openSectionDialog(sec.id)));
+        if (!sec.items.length) {
+          head.append(ctl("del", "×", "Elimina la sezione " + sec.title, () => {
+            if (!confirm(`Eliminare la sezione "${sec.title}"?`)) return;
+            data.sections.splice(data.sections.indexOf(sec), 1);
+            commit();
+          }));
+        }
+      }
+
       const ul = document.createElement("ul");
       ul.className = "grid";
+      ul.dataset.section = sec.id;
 
-      items.forEach(({ it, i }) => {
+      items.forEach(it => {
         visible++;
         const li = document.createElement("li");
         li.className = "cell";
+        li.dataset.id = it.id;
         li.append(tile(it));
-        if (sec.custom) {
-          const x = document.createElement("button");
-          x.type = "button";
-          x.className = "remove";
-          x.textContent = "×";
-          x.setAttribute("aria-label", "Rimuovi " + it.name);
-          x.addEventListener("click", () => {
-            custom.splice(i, 1);
-            save(STORE_LINKS, custom);
-            render();
-          });
-          li.append(x);
+        if (editing) {
+          li.draggable = true;
+          li.append(
+            ctl("edit", "✎", "Modifica " + it.name, () => openItemDialog(it.id)),
+            ctl("del", "×", "Elimina " + it.name, () => {
+              if (!confirm(`Eliminare "${it.name}"?`)) return;
+              const f = findItem(it.id);
+              f.s.items.splice(f.i, 1);
+              commit();
+            }),
+          );
+          const mv = document.createElement("div");
+          mv.className = "move";
+          mv.append(
+            ctl("up", "▲", "Sposta prima: " + it.name, () => moveBy(it.id, -1)),
+            ctl("down", "▼", "Sposta dopo: " + it.name, () => moveBy(it.id, 1)),
+          );
+          li.append(mv);
         }
         ul.append(li);
       });
@@ -399,47 +741,196 @@
         b.type = "button";
         b.className = "tile";
         b.innerHTML = '<span class="circle" aria-hidden="true">+</span><span class="name">Aggiungi</span>';
-        b.addEventListener("click", () => { addForm.reset(); dialog.showModal(); });
+        b.setAttribute("aria-label", "Aggiungi un collegamento in " + sec.title);
+        b.addEventListener("click", () => openItemDialog(null, sec.id));
         li.append(b);
         ul.append(li);
       }
 
-      s.append(h, ul);
+      s.append(head, ul);
       sectionsEl.append(s);
     });
 
-    emptyEl.hidden = !(term && visible === 0);
+    $("empty").hidden = !(term && visible === 0);
   }
 
+  // ——— Ricerca ———
   q.addEventListener("input", render);
-  document.getElementById("search-form").addEventListener("submit", e => {
+  $("search-form").addEventListener("submit", e => {
     e.preventDefault();
     const first = sectionsEl.querySelector("a.tile");
-    if (q.value.trim() && first) window.open(first.href, "_blank", "noopener,noreferrer");
+    if (q.value.trim() && first && !editing) first.click();
   });
 
-  document.getElementById("add-cancel").addEventListener("click", () => dialog.close());
-  addForm.addEventListener("submit", e => {
-    const data = new FormData(addForm);
-    const url = normalizeUrl(String(data.get("url")));
-    const urlInput = addForm.elements.url;
+  // ——— Trascinamento (anche tra sezioni) ———
+  let dragId = null;
+  function clearDropMarks() {
+    sectionsEl.querySelectorAll(".drop-before, .drop-after, .drop-end").forEach(el =>
+      el.classList.remove("drop-before", "drop-after", "drop-end"));
+  }
+  function dropTarget(e) {
+    const grid = e.target.closest && e.target.closest(".grid");
+    if (!grid) return null;
+    const cell = e.target.closest(".cell[data-id]");
+    if (cell && cell.dataset.id === dragId) return null;
+    if (cell) {
+      const r = cell.getBoundingClientRect();
+      return { cell, grid, after: e.clientX > r.left + r.width / 2 };
+    }
+    return { grid };
+  }
+  sectionsEl.addEventListener("dragstart", e => {
+    const cell = e.target.closest && e.target.closest(".cell[data-id]");
+    if (!editing || !cell) return;
+    dragId = cell.dataset.id;
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", dragId);
+    requestAnimationFrame(() => cell.classList.add("dragging"));
+  });
+  sectionsEl.addEventListener("dragover", e => {
+    if (!dragId) return;
+    const t = dropTarget(e);
+    clearDropMarks();
+    if (!t) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (t.cell) t.cell.classList.add(t.after ? "drop-after" : "drop-before");
+    else t.grid.classList.add("drop-end");
+  });
+  sectionsEl.addEventListener("drop", e => {
+    if (!dragId) return;
+    const t = dropTarget(e);
+    clearDropMarks();
+    if (!t) return;
+    e.preventDefault();
+    const sec = findSection(t.grid.dataset.section);
+    let index = sec.items.length;
+    if (t.cell) index = sec.items.findIndex(it => it.id === t.cell.dataset.id) + (t.after ? 1 : 0);
+    const id = dragId;
+    dragId = null;
+    moveTo(id, sec.id, index);
+    commit();
+  });
+  sectionsEl.addEventListener("dragend", () => {
+    dragId = null;
+    clearDropMarks();
+    sectionsEl.querySelectorAll(".dragging").forEach(el => el.classList.remove("dragging"));
+  });
+
+  // ——— Finestre ———
+  document.querySelectorAll("dialog [data-close]").forEach(b =>
+    b.addEventListener("click", () => b.closest("dialog").close()));
+
+  const itemDialog = $("item-dialog");
+  const itemForm = $("item-form");
+  let editingItemId = null;
+
+  function normalizeUrl(u) {
+    u = u.trim();
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
+    try {
+      const parsed = new URL(u);
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : null;
+    } catch (e) { return null; }
+  }
+
+  function openItemDialog(itemId, sectionId) {
+    editingItemId = itemId;
+    itemForm.reset();
+    const found = itemId ? findItem(itemId) : null;
+    const sel = itemForm.elements.section;
+    sel.textContent = "";
+    data.sections.forEach(s => sel.add(new Option(s.title, s.id)));
+    sel.add(new Option("Nuova sezione…", "__new"));
+
+    if (found) {
+      $("item-title").textContent = "Modifica collegamento";
+      $("item-submit").textContent = "Salva";
+      itemForm.elements.name.value = found.item.name;
+      itemForm.elements.url.value = found.item.url;
+      itemForm.elements.icon.value = found.item.icon;
+      itemForm.elements.type.value = found.item.type;
+      sel.value = found.s.id;
+    } else {
+      $("item-title").textContent = "Aggiungi collegamento";
+      $("item-submit").textContent = "Aggiungi";
+      const sec = findSection(sectionId) || data.sections[0];
+      sel.value = sec ? sec.id : "__new";
+      const exeSection = sec && (/\.exe/i.test(sec.title) || (sec.items.length && sec.items.every(it => it.type === "exe")));
+      itemForm.elements.type.value = exeSection ? "exe" : "site";
+    }
+    syncNewSectionField();
+    itemDialog.showModal();
+  }
+
+  function syncNewSectionField() {
+    const isNew = itemForm.elements.section.value === "__new";
+    $("new-section-field").hidden = !isNew;
+    itemForm.elements.newSection.required = isNew;
+  }
+  itemForm.elements.section.addEventListener("change", syncNewSectionField);
+  itemForm.elements.url.addEventListener("input", e => e.target.setCustomValidity(""));
+
+  // Un campo fatto solo di spazi supera "required" ma verrebbe rifiutato dal server.
+  function requireText(input, e) {
+    if (input.value.trim()) return true;
+    e.preventDefault();
+    input.value = "";
+    input.reportValidity();
+    return false;
+  }
+
+  itemForm.addEventListener("submit", e => {
+    const f = itemForm.elements;
+    if (!requireText(f.name, e)) return;
+    if (f.section.value === "__new" && !requireText(f.newSection, e)) return;
+    const url = normalizeUrl(f.url.value);
     if (!url) {
       e.preventDefault();
-      urlInput.setCustomValidity("Indirizzo non valido");
-      urlInput.reportValidity();
+      f.url.setCustomValidity("Indirizzo non valido");
+      f.url.reportValidity();
       return;
     }
-    custom.push({
-      name: String(data.get("name")).trim(),
-      icon: String(data.get("icon")).trim() || "🔗",
-      url,
-    });
-    save(STORE_LINKS, custom);
-    render();
+    let sectionId = f.section.value;
+    if (sectionId === "__new") {
+      const sec = { id: newId(), title: f.newSection.value.trim(), items: [] };
+      data.sections.push(sec);
+      sectionId = sec.id;
+    }
+    const values = { name: f.name.value.trim(), url, icon: f.icon.value.trim(), type: f.type.value };
+    const found = editingItemId && findItem(editingItemId);
+    if (found) {
+      Object.assign(found.item, values);
+      if (found.s.id !== sectionId) moveTo(found.item.id, sectionId, Infinity);
+    } else {
+      findSection(sectionId).items.push({ id: newId(), ...values });
+    }
+    commit();
   });
-  addForm.elements.url.addEventListener("input", e => e.target.setCustomValidity(""));
 
-  render();
+  const sectionDialog = $("section-dialog");
+  const sectionForm = $("section-form");
+  let editingSectionId = null;
+
+  function openSectionDialog(sectionId) {
+    editingSectionId = sectionId;
+    const sec = sectionId && findSection(sectionId);
+    $("section-title").textContent = sec ? "Rinomina sezione" : "Nuova sezione";
+    sectionForm.elements.title.value = sec ? sec.title : "";
+    sectionDialog.showModal();
+  }
+  $("new-section").addEventListener("click", () => openSectionDialog(null));
+
+  sectionForm.addEventListener("submit", e => {
+    if (!requireText(sectionForm.elements.title, e)) return;
+    const title = sectionForm.elements.title.value.trim();
+    const sec = editingSectionId && findSection(editingSectionId);
+    if (sec) sec.title = title;
+    else data.sections.push({ id: newId(), title, items: [] });
+    commit();
+  });
+
+  load();
 </script>
 </body>
 </html>
