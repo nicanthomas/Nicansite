@@ -16,5 +16,9 @@ module.exports = async (req, res) => {
     await sleep(800 + Math.floor(Math.random() * 400));
     return send(res, 401, { error: "Password sbagliata" });
   }
-  send(res, 200, { ok: true }, { "Set-Cookie": sessionCookie() });
+  let cookie;
+  try { cookie = sessionCookie(); } catch (e) {
+    return send(res, 500, { error: "Server non configurato: manca SESSION_SECRET" });
+  }
+  send(res, 200, { ok: true }, { "Set-Cookie": cookie });
 };

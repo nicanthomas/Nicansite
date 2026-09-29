@@ -559,7 +559,8 @@
         if (dirty && data) { show("app"); render(); persist(); }
         else load();
       } else {
-        err.textContent = r.status === 401 ? "Password sbagliata. Riprova." : "Errore del server, riprova tra poco.";
+        const detail = r.status === 401 ? "" : (await r.json().catch(() => ({}))).error;
+        err.textContent = r.status === 401 ? "Password sbagliata. Riprova." : (detail || "Errore del server, riprova tra poco.");
         err.hidden = false;
         $("password").select();
       }

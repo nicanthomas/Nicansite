@@ -1,7 +1,14 @@
 const { isAuthenticated, send, readJson, validate, seedData, loadLinks, saveLinks } = require("./_lib");
 
 module.exports = async (req, res) => {
-  if (!isAuthenticated(req)) return send(res, 401, { error: "Accesso richiesto" });
+  let authed;
+  try { authed = isAuthenticated(req); } catch (e) {
+    return send(res, 500, { error: "Server non configurato: manca SESSION_SECRET" });
+  }
+  if (!authed) return send(res, 401, { error: "Accesso richiesto" });
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return send(res, 500, { error: "Storage non configurato: manca BLOB_READ_WRITE_TOKEN" });
+  }
 
   try {
     if (req.method === "GET") {
